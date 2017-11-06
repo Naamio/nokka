@@ -36,6 +36,12 @@ class NaamioService {
         drop_service(ptr)
     }
 
+    func setHost(addr: String) {
+        if let addr = addr.asByteArray() {
+            set_naamio_host(addr)
+        }
+    }
+
     func registerPlugin(name: String, relUrl: String, endpoint: String) {
         if let name = name.asByteArray(),
            let relUrl = relUrl.asByteArray(),
@@ -44,14 +50,17 @@ class NaamioService {
             var req = RegisterRequest(name: name, rel_url: relUrl, endpoint: endpoint)
             register_plugin(ptr, &req, { (token) in
                 if let token = token.asString() {
-                    print("\(token)")
+                    print("Token: \(token)")
                 }
             })
         }
     }
 }
 
+set_log_level(3)
 let service = NaamioService(threads: 4)
 service.registerPlugin(name: "foo", relUrl: "/hey", endpoint: "localhost")
 
-sleep(2)
+// Give time for the async Rust future to resolve. In reality, we'll be having
+// an infinite loop, so this won't be necessary.
+sleep(1)
