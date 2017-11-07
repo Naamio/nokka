@@ -38,6 +38,8 @@ struct RegisterRequest {
     struct ByteArray endpoint;
 };
 
-void register_plugin(struct Opaque *rust_service,
+// The closure represents a Swift class with a context-captured closure.
+void register_plugin(void *closure,
+                     struct Opaque *rust_service,
                      struct RegisterRequest *req,
-                     void (*callback)(struct ByteArray token));
+                     void (*callback)(void *closure, struct ByteArray token));
