@@ -9,6 +9,11 @@ extension ByteArray {
         let ptr = UnsafeBufferPointer(start: bytes, count: len)
         return String(bytes: ptr, encoding: String.Encoding.utf8)
     }
+
+    /// Deallocate the allocated pointer.
+    func deallocate() {
+        UnsafeMutablePointer(mutating: bytes).deallocate(capacity: len)
+    }
 }
 
 extension String {
@@ -72,17 +77,37 @@ class NaamioService {
         }
     }
 
-    /* Plugin methods and related callback classes */
+    /* Plugin methods and related classes */
 
-    /// The callback belonging to a registration request.
-    private class RegistrationCallback {
+    private class RegistrationData {
+        let data: RegisterRequest?
         let callback: (ByteArray) -> Void
 
-        init(cb: @escaping (String) -> Void) {
+        init(name: String, relUrl: String, endpoint: String,
+             cb: @escaping (String) -> Void)
+        {
+            if let name = name.asByteArray(),
+               let relUrl = relUrl.asByteArray(),
+               let endpoint = endpoint.asByteArray()
+            {
+                data = RegisterRequest(name: name, rel_url: relUrl,
+                                       endpoint: endpoint)
+            } else {
+                data = nil
+            }
+
             callback = { (token) in
                 if let token = token.asString() {
                     cb(token)
                 }
+            }
+        }
+
+        deinit {
+            if let d = data {
+                d.name.deallocate()
+                d.rel_url.deallocate()
+                d.endpoint.deallocate()
             }
         }
     }
@@ -92,20 +117,21 @@ class NaamioService {
                         endpoint: String,
                         callback: @escaping (String) -> Void)
     {
-        if let name = name.asByteArray(),
-           let relUrl = relUrl.asByteArray(),
-           let endpoint = endpoint.asByteArray()
-        {
-            var req = RegisterRequest(name: name, rel_url: relUrl, endpoint: endpoint)
-            let cb = RegistrationCallback(cb: callback)
-            let cbPtr = UnsafeMutableRawPointer(Unmanaged.passUnretained(cb).toOpaque())
-            register_plugin(cbPtr, ptr, &req, { (ptr, token) in
-                if let ptr = ptr {
-                    let cbObj = Unmanaged<RegistrationCallback>.fromOpaque(ptr)
-                                                               .takeUnretainedValue()
-                    cbObj.callback(token)
+        let data = RegistrationData(name: name, relUrl: relUrl,
+                                    endpoint: endpoint, cb: callback)
+        if var req = data.data {
+            let opaque = Unmanaged.passUnretained(data).toOpaque()
+            let dataPtr = UnsafeMutableRawPointer(opaque)
+
+            register_plugin(dataPtr, ptr, &req, { (dataPtr, token) in
+                if let dataPtr = dataPtr {
+                    let data = Unmanaged<RegistrationData>.fromOpaque(dataPtr)
+                                                          .takeUnretainedValue()
+                    data.callback(token)
                 }
             })
+        } else {
+            // Cannot create byte array?
         }
     }
 }

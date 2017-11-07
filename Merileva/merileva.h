@@ -23,13 +23,6 @@ struct ByteArray {
 // Has effect only if it's a valid URI (default: "http://localhost:8000")
 void set_naamio_host(struct ByteArray addr);
 
-// Foreign type owned by FFI realm (i.e., Swift classes).
-// Rust will call the destructor once it's utilized.
-struct ForeignObject {
-    void *object;
-    void (*destructor)(void *object);
-};
-
 /* Plugin registration */
 
 struct RegisterRequest {
