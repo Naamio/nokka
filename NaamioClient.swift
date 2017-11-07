@@ -42,6 +42,17 @@ class NaamioService {
 
     /* Plugin methods and related classes */
 
+    // Swift doesn't allow us to cast closures to pointers, and
+    // we can't pass capturing closures to C function pointers.
+    // So, we workaround by storing the callback (and the FFI data)
+    // into a class and casting it as a void pointer
+    // (which should be freed after executing the callback).
+
+    // NOTE: I'm still unsure whether it's the right way, but I'm
+    // quite sure that we shouldn't do async stuff in these callback closures.
+    // Because, the FFI values passed to the callbacks are owned by Rust,
+    // and it deallocates them immediately after the function call)
+
     private class RegistrationData {
         var data: RegisterRequest
         let callback: (String) -> Void
@@ -70,6 +81,23 @@ class NaamioService {
                 let data = Unmanaged<RegistrationData>.fromOpaque(dataPtr)
                                                       .takeUnretainedValue()
                 data.callback(String(cString: token))
+            }
+        })
+    }
+
+    func registerPlugin(name: String, relUrl: String,
+                        endpoint: String, hostUrl: String,
+                        callback: @escaping (String) -> Void)
+    {
+        let data = RegistrationData(name: name, relUrl: relUrl,
+                                    endpoint: endpoint, cb: callback)
+        let opaque = Unmanaged.passUnretained(data).toOpaque()
+        let dataPtr = UnsafeMutableRawPointer(opaque)
+        register_plugin_with_host(dataPtr, self.ptr, hostUrl,
+                                  &data.data, { (dataPtr) in
+            if let dataPtr = dataPtr {
+                let _ = Unmanaged<RegistrationData>.fromOpaque(dataPtr)
+                                                   .takeUnretainedValue()
             }
         })
     }
