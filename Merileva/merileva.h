@@ -14,25 +14,26 @@ void set_log_level(uint8_t level);
 // Since it's allocated on the Rust side, it should be deallocated there.
 void drop_service(struct Opaque *rust_service);
 
-// C-style struct to represent a String or a slice
-struct ByteArray {
-    const uint8_t *bytes;
-    size_t len;
-};
-
 // Has effect only if it's a valid URI (default: "http://localhost:8000")
-void set_naamio_host(struct ByteArray addr);
+void set_naamio_host(const char *addr);
 
 /* Plugin registration */
 
 struct RegisterRequest {
-    struct ByteArray name;
-    struct ByteArray rel_url;
-    struct ByteArray endpoint;
+    const char *name;
+    const char *rel_url;
+    const char *endpoint;
 };
 
-// The closure represents a Swift class with a context-captured closure.
+// NOTE: The closure represents a Swift class with a context-captured closure.
+
 void register_plugin(void *closure,
                      struct Opaque *rust_service,
                      struct RegisterRequest *req,
-                     void (*callback)(void *closure, struct ByteArray token));
+                     void (*callback)(void *closure, const char *token));
+
+void register_plugin_with_host(void *closure,
+                               struct Opaque *rust_service,
+                               const char *host,
+                               struct RegisterRequest *req,
+                               void (*callback)(void *closure));
