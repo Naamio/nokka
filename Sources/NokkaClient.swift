@@ -25,13 +25,13 @@ public class Plugin {
         self.address = address.trim(chars: "/")
     }
 
-    func addEndpoint(relUrl: String, hostUrl: String, token: String) {
-        self.addEndpoint(relUrl: relUrl, hostUrl: hostUrl,
-                         token: token, endpoint: nil)
+    func registerEndpoint(relUrl: String, hostUrl: String, token: String) {
+        self.registerEndpoint(relUrl: relUrl, hostUrl: hostUrl,
+                              token: token, endpoint: nil)
     }
 
-    func addEndpoint(relUrl: String, hostUrl: String,
-                     token: String, endpoint: String?) {
+    func registerEndpoint(relUrl: String, hostUrl: String,
+                          token: String, endpoint: String?) {
         var e = address + "/"
         if let ep = endpoint {
             e += ep.trim(chars: "/")
