@@ -32,12 +32,13 @@ public class NaamioPlugin {
         {
             let header = request.headers["Authorization"] ?? "       "
             let idx = header.index(header.startIndex, offsetBy: 7)
-            if auth != header[idx...] {
+            if auth == header[idx...] {
+                next()
+            } else {
                 Log.info("Authorization failed")
-                response.error = NSError(domain: "AuthFailure", code: 1, userInfo: [:])
+                response.statusCode = .unauthorized
+                response.finish()
             }
-
-            next()
         }
     }
 
@@ -53,19 +54,23 @@ public class NaamioPlugin {
         {
             do {
                 let data = try request.read(as: RegistrationData.self)
+                Log.info("Incoming plugin: \(data)")
                 if let _ = self.plugin.endpoints[data.relUrl] {
-                    Log.error("Another plugin has already registered!")
+                    response.statusCode = .forbidden
                 } else {
                     let token = randomBase64(len: 64)
                     let p = PluginInfo(name: data.name, url: data.endpoint, token: token)
                     self.plugin.endpoints[data.relUrl] = p
-                    Log.info("Successfully registered \(p.name) for \(p.url)!")
+                    Log.info("Successfully registered \(p.name) for \(p.url)")
+                    response.statusCode = .OK
+                    response.send(json: Token(token: token))
                 }
             } catch let err {
                 Log.error("Cannot obtain JSON object from request: \(err)")
+                response.statusCode = .badRequest
             }
 
-            next()
+            response.finish()
         }
     }
 
@@ -79,14 +84,16 @@ public class NaamioPlugin {
                     response: RouterResponse,
                     next: @escaping () -> Void)
         {
+            // TODO: Plugin proxy
+            response.statusCode = .OK
+
             if let plugin = self.plugin.endpoints[request.urlURL.absoluteString] {
                 Log.info("Found plugin: \(plugin)")
-                // TODO: Proxy endpoint
             } else {
                 Log.error("Nothing to forward to!")
             }
 
-            next()
+            response.finish()
         }
     }
 

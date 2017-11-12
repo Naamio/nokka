@@ -17,16 +17,27 @@ public class NaamioClient {
     }
 
     func request<D>(with: RestRequest,
-                    callback: @escaping (D?) -> Void)
+                    callback: @escaping (HttpResponse<D>) -> Void)
         where D: Decodable
     {
-        with.responseData(completionHandler: { response in
-            if let data = response.data {
-                let d = try? JSONDecoder().decode(D.self, from: data)
-                callback(d)
-            } else {
-                callback(nil)
+        with.responseData(completionHandler: { resp in
+            var d: D? = nil
+            // We're not performing any substitutions, so this will exist
+            let response = resp.response!
+
+            do {
+                if let data = resp.data {
+                    d = try JSONDecoder().decode(D.self, from: data)
+                } else {
+                    throw "Empty body"
+                }
+            } catch let err {
+                Log.error("Cannot get JSON data: \(err)")
             }
+
+            let r = HttpResponse(data: d, code: response.statusCode,
+                                 headers: response.allHeaderFields)
+            callback(r)
         })
     }
 
@@ -38,11 +49,17 @@ public class NaamioClient {
         let d = RegistrationData(name: name, relUrl: relUrl, endpoint: endpoint)
         Log.info("Registering plugin \(name) (relUrl: \(relUrl), endpoint: \(endpoint))")
         req.setJsonBody(data: d)
-        request(with: req, callback: { (token: Token?) in
-            if let t = token {
-                callback(t.token)
-            } else {
-                Log.error("Failed to get token for plugin registration")
+        request(with: req, callback: { (response: HttpResponse<Token>) in
+            if response.code == 200 {
+                if let t = response.data {
+                    callback(t.token)
+                } else {
+                    Log.error("Failed to get token for plugin registration")
+                }
+            } else if response.code == 401 {
+                Log.error("Auth failed with server")
+            } else if response.code == 403 {
+                Log.error("Server has forbidden us!")
             }
         })
     }

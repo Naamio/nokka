@@ -1,4 +1,5 @@
 import Foundation
+import Kitura
 import LoggerAPI
 import RandomKit
 import SwiftyRequest
@@ -12,6 +13,9 @@ func randomBase64(len: Int) -> String {
         return String(base64[..<idx])
     })
 }
+
+// To throw errors with custom messages
+extension String: Error {}
 
 extension String {
     /// Helper function so that I don't have to type this beast all the time!
@@ -27,5 +31,15 @@ extension RestRequest {
         // Content-Type defaults to JSON
         Log.debug("Encoded JSON data: \(jsonData.count) bytes")
         self.messageBody = jsonData
+    }
+}
+
+extension RouterResponse {
+    func finish() {
+        do {
+            try self.end()      // only socket errors occur here
+        } catch let err {
+            Log.error("Error sending response: \(err)")
+        }
     }
 }
