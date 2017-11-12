@@ -5,8 +5,7 @@ import Kitura
 import LoggerAPI
 
 Log.logger = HeliumLogger()
-var service = NaamioService(threads: 4)
-service.setLogLevel(level: LogLevel.Info)
+let client = NaamioClient()
 
 // Let's create some plugins. Since Naamio handles plugin registrations
 // just like any other plugin, this shouldn't be any different.
@@ -23,16 +22,16 @@ let odinSecret = odin.authToken
 // (they're not the plugins themselves, but they should be consistent)
 let odinBorson = Plugin(name: "Odin",
                         address: "http://0.0.0.0:8000",
-                        service: &service)
+                        client: client)
 let thorOdinson = Plugin(name: "Thor",
                          address: "http://0.0.0.0:8001",
-                         service: &service)
+                         client: client)
 let lokiLaufeyson = Plugin(name: "Loki",
                            address: "http://0.0.0.0:8002",
-                           service: &service)
+                           client: client)
 
 DispatchQueue.global().async {
-    sleep(5)
+    sleep(3)
     print("Beginning registrations...")
 
     thorOdinson.registerEndpoint(relUrl: "/asgard", hostUrl: odinHome,

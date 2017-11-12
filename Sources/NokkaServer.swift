@@ -30,7 +30,9 @@ public class NaamioPlugin {
                     response: RouterResponse,
                     next: @escaping () -> Void)
         {
-            if auth != request.headers["Authorization"] {
+            let header = request.headers["Authorization"] ?? "       "
+            let idx = header.index(header.startIndex, offsetBy: 7)
+            if auth != header[idx...] {
                 Log.info("Authorization failed")
                 response.error = NSError(domain: "AuthFailure", code: 1, userInfo: [:])
             }
@@ -49,29 +51,18 @@ public class NaamioPlugin {
                     response: RouterResponse,
                     next: @escaping () -> Void)
         {
-            if let body = request.body {
-                if let json = body.asJSON {
-                    let n = json["name"] as? String
-                    let u = json["rel_url"] as? String
-                    let e = json["endpoint"] as? String
-
-                    if let name = n, let relUrl = u, let endpoint = e {
-                        if let _ = self.plugin.endpoints[relUrl] {
-                            Log.error("Another plugin has already registered!")
-                        } else {
-                            let token = randomBase64(len: 64)
-                            let p = PluginInfo(name: name, url: endpoint, token: token)
-                            self.plugin.endpoints[relUrl] = p
-                            Log.info("Successfully registered plugin!")
-                        }
-                    } else {
-                        Log.error("Invalid types in JSON")
-                    }
+            do {
+                let data = try request.read(as: RegistrationData.self)
+                if let _ = self.plugin.endpoints[data.relUrl] {
+                    Log.error("Another plugin has already registered!")
                 } else {
-                    Log.error("Invalid JSON")
+                    let token = randomBase64(len: 64)
+                    let p = PluginInfo(name: data.name, url: data.endpoint, token: token)
+                    self.plugin.endpoints[data.relUrl] = p
+                    Log.info("Successfully registered \(p.name) for \(p.url)!")
                 }
-            } else {
-                Log.error("Empty body!")
+            } catch let err {
+                Log.error("Cannot obtain JSON object from request: \(err)")
             }
 
             next()

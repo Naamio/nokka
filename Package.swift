@@ -6,7 +6,6 @@ import PackageDescription
 let package = Package(
     name: "nokka",
     dependencies: [
-        .package(url: "../merileva", from: "1.0.0"),
         .package(url: "https://github.com/IBM-Swift/HeliumLogger.git", .upToNextMinor(from: "1.7.0")),
         .package(url: "https://github.com/IBM-Swift/Kitura.git", from: "2.0.0"),
         .package(url: "https://github.com/nvzqz/RandomKit.git", from: "5.0.0"),
