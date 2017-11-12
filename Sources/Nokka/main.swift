@@ -3,15 +3,17 @@ import Foundation
 import HeliumLogger
 import Kitura
 import LoggerAPI
+import NokkaClient
+import NokkaServer
 
 Log.logger = HeliumLogger(.info)
 let client = Client()
 
 // Let's create some plugins. Since Naamio handles plugin registrations
 // just like any other plugin, this shouldn't be any different.
-let odin = Applet()
-let thor = Applet()
-let loki = Applet()
+let odin = Server()
+let thor = Server()
+let loki = Server()
 
 // For now, we consider one plugin, and Odin owns all,
 // though this doesn't have to be the case.

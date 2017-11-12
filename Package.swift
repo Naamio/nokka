@@ -21,7 +21,19 @@ let package = Package(
     targets: [
         .target(
             name: "Nokka",
+            dependencies: ["NokkaClient", "NokkaServer"]
+        ),
+        .target(
+            name: "NokkaClient",
+            dependencies: ["Kitura", "NokkaCore"]
+        ),
+        .target(
+            name: "NokkaCore",
             dependencies: ["HeliumLogger", "Kitura", "RandomKit", "SwiftyRequest"]
+        ),
+        .target(
+            name: "NokkaServer",
+            dependencies: ["NokkaCore"]
         ),
         .testTarget(
             name: "NokkaTests",

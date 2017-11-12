@@ -1,8 +1,13 @@
 import Foundation
 import LoggerAPI
+import NokkaCore
 import SwiftyRequest
 
+/// # Client
 public class Client {
+
+    public init() {}
+
     func prepareRequest(method: HTTPMethod, url: String,
                         auth: String?) -> RestRequest
     {
@@ -64,46 +69,6 @@ public class Client {
             } else if response.code == 403 {
                 Log.error("Server has forbidden us!")
             }
-        })
-    }
-}
-
-public class AppletClient {
-    private class HostAuth {
-        let url: String
-        let token: String
-        var registeredToken: String?
-
-        init(url: String, token: String) {
-            self.url = url
-            self.token = token
-        }
-    }
-
-    private let name: String
-    private let address: String
-    private let client: Client
-    private var endpoints = [String: HostAuth]()
-
-    init(name: String, address: String, client: Client) {
-        self.name = name
-        self.client = client
-        self.address = address.trim(chars: "/")
-    }
-
-    func registerEndpoint(relUrl: String, hostUrl: String,
-                          token: String, endpoint: String? = nil) {
-        var e = address + "/"
-        if let ep = endpoint {
-            e += ep.trim(chars: "/")
-        }
-
-        endpoints[relUrl] = HostAuth(url: hostUrl, token: token)
-
-        client.registerApplet(name: name, relUrl: relUrl,
-                              endpoint: e, hostUrl: hostUrl,
-                              token: token, callback: { authToken in
-            self.endpoints[relUrl]!.registeredToken = authToken
         })
     }
 }
