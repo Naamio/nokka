@@ -5,28 +5,28 @@ import Kitura
 import LoggerAPI
 
 Log.logger = HeliumLogger(.info)
-let client = NaamioClient()
+let client = Client()
 
 // Let's create some plugins. Since Naamio handles plugin registrations
 // just like any other plugin, this shouldn't be any different.
-let odin = NaamioPlugin()
-let thor = NaamioPlugin()
-let loki = NaamioPlugin()
+let odin = Applet()
+let thor = Applet()
+let loki = Applet()
 
 // For now, we consider one plugin, and Odin owns all,
 // though this doesn't have to be the case.
-let odinHome = "http://0.0.0.0:8000/plugins/register"
+let odinHome = "http://0.0.0.0:8000/applets/register"
 let odinSecret = odin.authToken
 
 // Unlike the above, these represent the client-side version of the plugin.
 // (they're not the plugins themselves, but they should be consistent)
-let odinBorson = Plugin(name: "Odin",
+let odinBorson = AppletClient(name: "Odin",
                         address: "http://0.0.0.0:8000",
                         client: client)
-let thorOdinson = Plugin(name: "Thor",
+let thorOdinson = AppletClient(name: "Thor",
                          address: "http://0.0.0.0:8001",
                          client: client)
-let lokiLaufeyson = Plugin(name: "Loki",
+let lokiLaufeyson = AppletClient(name: "Loki",
                            address: "http://0.0.0.0:8002",
                            client: client)
 

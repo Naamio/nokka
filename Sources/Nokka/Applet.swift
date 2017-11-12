@@ -3,12 +3,12 @@ import Kitura
 import LoggerAPI
 import SwiftyRequest
 
-public class NaamioPlugin {
+public class Applet {
     let router: Router
-    var endpoints: [String: PluginInfo]
+    var endpoints: [String: AppletInfo]
     let authToken: String
 
-    class PluginInfo {
+    class AppletInfo {
         let name: String
         let url: String
         let token: String
@@ -42,10 +42,10 @@ public class NaamioPlugin {
         }
     }
 
-    class PluginRegistrationMiddleware: RouterMiddleware {
-        let plugin: NaamioPlugin
-        init(plugin: NaamioPlugin) {
-            self.plugin = plugin
+    class AppletRegistrationMiddleware: RouterMiddleware {
+        let applet: Applet
+        init(applet: Applet) {
+            self.applet = applet
         }
 
         func handle(request: RouterRequest,
@@ -54,13 +54,13 @@ public class NaamioPlugin {
         {
             do {
                 let data = try request.read(as: RegistrationData.self)
-                Log.info("Incoming plugin: \(data)")
-                if let _ = self.plugin.endpoints[data.relUrl] {
+                Log.info("Incoming applet: \(data)")
+                if let _ = self.applet.endpoints[data.relUrl] {
                     response.statusCode = .forbidden
                 } else {
                     let token = randomBase64(len: 64)
-                    let p = PluginInfo(name: data.name, url: data.endpoint, token: token)
-                    self.plugin.endpoints[data.relUrl] = p
+                    let p = AppletInfo(name: data.name, url: data.endpoint, token: token)
+                    self.applet.endpoints[data.relUrl] = p
                     Log.info("Successfully registered \(p.name) for \(p.url)")
                     response.statusCode = .OK
                     response.send(json: Token(token: token))
@@ -75,9 +75,9 @@ public class NaamioPlugin {
     }
 
     class ForwardingMiddleware: RouterMiddleware {
-        let plugin: NaamioPlugin
-        init(plugin: NaamioPlugin) {
-            self.plugin = plugin
+        let applet: Applet
+        init(applet: Applet) {
+            self.applet = applet
         }
 
         func handle(request: RouterRequest,
@@ -87,8 +87,8 @@ public class NaamioPlugin {
             // TODO: Plugin proxy
             response.statusCode = .OK
 
-            if let plugin = self.plugin.endpoints[request.urlURL.absoluteString] {
-                Log.info("Found plugin: \(plugin)")
+            if let applet = self.applet.endpoints[request.urlURL.absoluteString] {
+                Log.info("Found applet: \(applet)")
             } else {
                 Log.error("Nothing to forward to!")
             }
@@ -99,11 +99,11 @@ public class NaamioPlugin {
 
     init() {
         router = Router()
-        endpoints = [String: PluginInfo]()
+        endpoints = [String: AppletInfo]()
         authToken = randomBase64(len: 64)
 
-        router.post("/plugins/register", middleware: BasicAuthMiddleware(auth: authToken))
-        router.post("/plugins/register", middleware: PluginRegistrationMiddleware(plugin: self))
-        router.all("/*", middleware: ForwardingMiddleware(plugin: self))
+        router.post("/applets/register", middleware: BasicAuthMiddleware(auth: authToken))
+        router.post("/applets/register", middleware: AppletRegistrationMiddleware(applet: self))
+        router.all("/*", middleware: ForwardingMiddleware(applet: self))
     }
 }

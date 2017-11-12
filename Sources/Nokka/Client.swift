@@ -2,7 +2,7 @@ import Foundation
 import LoggerAPI
 import SwiftyRequest
 
-public class NaamioClient {
+public class Client {
     func prepareRequest(method: HTTPMethod, url: String,
                         auth: String?) -> RestRequest
     {
@@ -41,14 +41,17 @@ public class NaamioClient {
         })
     }
 
-    func registerPlugin(name: String, relUrl: String,
+    func registerApplet(name: String, relUrl: String,
                         endpoint: String, hostUrl: String,
                         token: String, callback: @escaping (String) -> Void)
     {
         let req = prepareRequest(method: HTTPMethod.post, url: hostUrl, auth: token)
         let d = RegistrationData(name: name, relUrl: relUrl, endpoint: endpoint)
+        
         Log.info("Registering plugin \(name) (relUrl: \(relUrl), endpoint: \(endpoint))")
+        
         req.setJsonBody(data: d)
+        
         request(with: req, callback: { (response: HttpResponse<Token>) in
             if response.code == 200 {
                 if let t = response.data {
@@ -65,7 +68,7 @@ public class NaamioClient {
     }
 }
 
-public class Plugin {
+public class AppletClient {
     private class HostAuth {
         let url: String
         let token: String
@@ -79,10 +82,10 @@ public class Plugin {
 
     private let name: String
     private let address: String
-    private let client: NaamioClient
+    private let client: Client
     private var endpoints = [String: HostAuth]()
 
-    init(name: String, address: String, client: NaamioClient) {
+    init(name: String, address: String, client: Client) {
         self.name = name
         self.client = client
         self.address = address.trim(chars: "/")
@@ -97,7 +100,7 @@ public class Plugin {
 
         endpoints[relUrl] = HostAuth(url: hostUrl, token: token)
 
-        client.registerPlugin(name: name, relUrl: relUrl,
+        client.registerApplet(name: name, relUrl: relUrl,
                               endpoint: e, hostUrl: hostUrl,
                               token: token, callback: { authToken in
             self.endpoints[relUrl]!.registeredToken = authToken
