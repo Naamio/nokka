@@ -4,7 +4,7 @@ import HeliumLogger
 import Kitura
 import LoggerAPI
 
-Log.logger = HeliumLogger()
+Log.logger = HeliumLogger(.info)
 let client = NaamioClient()
 
 // Let's create some plugins. Since Naamio handles plugin registrations
@@ -32,15 +32,18 @@ let lokiLaufeyson = Plugin(name: "Loki",
 
 DispatchQueue.global().async {
     sleep(3)
-    print("Beginning registrations...")
+    Log.info("Beginning registrations...")
 
     thorOdinson.registerEndpoint(relUrl: "/asgard", hostUrl: odinHome,
                                  token: odinSecret)
     // forward Odin's "/midgard" traffic to Thor's "/earth"
     thorOdinson.registerEndpoint(relUrl: "/midgard", hostUrl: odinHome,
-                                 token: odinSecret, endpoint: "/earth")
+                                 token: odinSecret, endpoint: "/home")
     lokiLaufeyson.registerEndpoint(relUrl: "/jötunheimr", hostUrl: odinHome,
                                    token: odinSecret, endpoint: "/home")
+    // Loki tries to cheat
+    lokiLaufeyson.registerEndpoint(relUrl: "/midgard", hostUrl: odinHome,
+                                   token: odinSecret, endpoint: "/earth")
 }
 
 Kitura.addHTTPServer(onPort: 8000, with: odin.router)
