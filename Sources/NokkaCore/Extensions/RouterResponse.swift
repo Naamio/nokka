@@ -3,7 +3,7 @@ import Kitura
 import LoggerAPI
 
 extension RouterResponse {
-    func finish() {
+    public func finish() {
         do {
             try self.end()      // only socket errors occur here
         } catch let err {

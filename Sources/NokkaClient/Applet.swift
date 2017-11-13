@@ -1,5 +1,5 @@
 public class AppletClient {
-    private class HostAuth {
+    class HostAuth {
         let url: String
         let token: String
         var registeredToken: String?
@@ -10,19 +10,19 @@ public class AppletClient {
         }
     }
 
-    private let name: String
-    private let address: String
-    private let client: Client
-    private var endpoints = [String: HostAuth]()
+    let name: String
+    let address: String
+    let client = Client()
+    var endpoints = [String: HostAuth]()
 
-    public init(name: String, address: String, client: Client) {
+    public init(name: String, address: String) {
         self.name = name
-        self.client = client
         self.address = address.trim(chars: "/")
     }
 
     public func registerEndpoint(relUrl: String, hostUrl: String,
-                          token: String, endpoint: String? = nil) {
+                                 token: String, endpoint: String? = nil)
+    {
         var e = address + "/"
         if let ep = endpoint {
             e += ep.trim(chars: "/")

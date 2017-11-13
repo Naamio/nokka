@@ -7,7 +7,6 @@ import NokkaClient
 import NokkaServer
 
 Log.logger = HeliumLogger(.info)
-let client = Client()
 
 // Let's create some plugins. Since Naamio handles plugin registrations
 // just like any other plugin, this shouldn't be any different.
@@ -22,15 +21,9 @@ let odinSecret = odin.authToken
 
 // Unlike the above, these represent the client-side version of the plugin.
 // (they're not the plugins themselves, but they should be consistent)
-let odinBorson = AppletClient(name: "Odin",
-                        address: "http://0.0.0.0:8000",
-                        client: client)
-let thorOdinson = AppletClient(name: "Thor",
-                         address: "http://0.0.0.0:8001",
-                         client: client)
-let lokiLaufeyson = AppletClient(name: "Loki",
-                           address: "http://0.0.0.0:8002",
-                           client: client)
+let odinBorson = AppletClient(name: "Odin", address: "http://0.0.0.0:8000")
+let thorOdinson = AppletClient(name: "Thor", address: "http://0.0.0.0:8001")
+let lokiLaufeyson = AppletClient(name: "Loki", address: "http://0.0.0.0:8002")
 
 DispatchQueue.global().async {
     sleep(3)
