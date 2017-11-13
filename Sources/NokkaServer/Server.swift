@@ -1,12 +1,13 @@
 import Foundation
 import Kitura
 import LoggerAPI
+import NokkaCore
 import SwiftyRequest
 
 public class Server {
     public let router: Router
     public var endpoints: [String: AppletInfo]
-    public let authToken: String 
+    public let authToken: String
 
     public init() {
         router = Router()
@@ -29,4 +30,4 @@ public class AppletInfo {
         self.url = url
         self.token = token
     }
-}   
+}
