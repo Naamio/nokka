@@ -11,7 +11,7 @@ build: clean
 test: build
 	swift test
 
-build-release clean:
+build-release: clean
 	docker run -v $$(pwd):/tmp/nokka -w /tmp/nokka -it ibmcom/swift-ubuntu:4.0 swift build -c release -Xcc -fblocks -Xlinker -L/usr/local/lib
 
-.PHONY: build test run
+.PHONY: clean build test run
