@@ -4,30 +4,38 @@ import LoggerAPI
 import NokkaCore
 import SwiftyRequest
 
-public class Server {
-    public let router: Router
-    public var endpoints: [String: AppletInfo]
-    public let authToken: String
-
-    public init() {
-        router = Router()
-        endpoints = [String: AppletInfo]()
-        authToken = randomBase64(len: 64)
-
-        router.post("/applets/register", middleware: BasicAuthMiddleware(auth: authToken))
-        router.post("/applets/register", middleware: RegistrationMiddleware(server: self))
-        router.all("/*", middleware: ForwardingMiddleware(server: self))
-    }
+public struct AppletInfo {
+    /// Name of the applet
+    public let name: String
+    /// URL to which we should forward the traffic
+    public let url: String
+    /// Token assigned to the applet on registration.
+    /// Only the registered applet can unregister itself.
+    /// This token will be used for validating that.
+    public let token: String
 }
 
-public class AppletInfo {
-    let name: String
-    let url: String
-    let token: String
+open class AppletServer {
+    public let router = Router()
+    public var endpoints = [String: AppletInfo]()
+    public let authToken = randomBase64(len: 64)
+    public let client = HttpClient()
+    public let port: Int
 
-    init(name: String, url: String, token: String) {
-        self.name = name
-        self.url = url
-        self.token = token
+    public init(port: Int) {
+        self.port = port
+        /// Routes that should be initialized before all routes
+        router.post(NokkaRoutes.appletRegistration,
+                    middleware: BasicAuthMiddleware(token: authToken))
+        router.post(NokkaRoutes.appletRegistration,
+                    middleware: RegistrationMiddleware(app: self))
+    }
+
+    public func initializeForwarding() {
+        router.all("/*", middleware: ForwardingMiddleware(app: self))
+    }
+
+    public func createHTTPServer() {
+        Kitura.addHTTPServer(onPort: port, with: router)
     }
 }

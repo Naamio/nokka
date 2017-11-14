@@ -1,3 +1,10 @@
+/// Routes that (when changed) will affect the library.
+public struct NokkaRoutes {
+    public static let glob                     = "/*"
+    public static let appletRegistration       = "/applets/register"
+}
+
+/// Generic HTTP response used by the `HTTPClient`
 public struct HttpResponse<T> {
     public let data: T?
     public let code: Int
@@ -10,6 +17,7 @@ public struct HttpResponse<T> {
     }
 }
 
+/// JSON object used for applet registration.
 public struct RegistrationData: Codable {
     public let name: String
     public let relUrl: String
@@ -22,6 +30,7 @@ public struct RegistrationData: Codable {
     }
 }
 
+/// Token object received after applet registration.
 public struct Token: Codable {
     public let token: String
 

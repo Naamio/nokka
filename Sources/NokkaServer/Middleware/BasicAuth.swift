@@ -3,10 +3,12 @@ import LoggerAPI
 import NokkaCore
 import SwiftyRequest
 
+/// This expects the secret token in `Authorization` header for
+/// requests to certain endpoints. Hence, it serves as a gate.
 class BasicAuthMiddleware: RouterMiddleware {
-    let auth: String
-    init(auth: String) {
-        self.auth = auth
+    let authToken: String
+    init(token: String) {
+        authToken = token
     }
 
     func handle(request: RouterRequest,
@@ -15,7 +17,7 @@ class BasicAuthMiddleware: RouterMiddleware {
     {
         let header = request.headers["Authorization"] ?? "       "
         let idx = header.index(header.startIndex, offsetBy: 7)
-        if auth == header[idx...] {
+        if authToken == header[idx...] {
             next()
         } else {
             Log.info("Authorization failed")
