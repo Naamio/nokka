@@ -9,7 +9,7 @@ extension HttpClient {
     public func registerApplet(name: String, relUrl: String,
                                endpoint: String, hostUrl: String,
                                token: String,
-                               callback: @escaping (String) -> Void)
+                               callback: @escaping (String?) -> Void)
     {
         let url = hostUrl.joinPath(NokkaRoutes.appletRegistration)
         let req = prepareRequest(method: HTTPMethod.post, url: url, auth: token)
@@ -22,7 +22,7 @@ extension HttpClient {
         request(with: req, callback: { (response: HttpResponse<Token>) in
             if response.code == 200 {
                 if let t = response.data {
-                    callback(t.token)
+                    return callback(t.token)
                 } else {
                     Log.error("Failed to get token for plugin registration")
                 }
@@ -31,6 +31,8 @@ extension HttpClient {
             } else if response.code == 403 {
                 Log.error("Server has forbidden us!")
             }
+
+            callback(nil)
         })
     }
 }

@@ -8,7 +8,9 @@ let package = Package(
         .library(
             name: "Nokka",
             targets: [
-                "Nokka"
+                "NokkaClient",
+                "NokkaCore",
+                "NokkaServer",
             ]
         )
     ],
@@ -19,10 +21,6 @@ let package = Package(
         .package(url: "https://github.com/IBM-Swift/SwiftyRequest.git", .upToNextMajor(from: "0.0.0"))
     ],
     targets: [
-        .target(
-            name: "Nokka",
-            dependencies: ["NokkaClient", "NokkaServer"]
-        ),
         .target(
             name: "NokkaClient",
             dependencies: ["Kitura", "NokkaCore"]
@@ -37,7 +35,7 @@ let package = Package(
         ),
         .testTarget(
             name: "NokkaTests",
-            dependencies: []
+            dependencies: ["NokkaClient", "NokkaServer"]
         )
     ]
 )

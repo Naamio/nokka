@@ -1,12 +1,12 @@
 import NokkaCore
 
-class HostAuth {
+public class HostAuth {
     /// The host URL on which the applet registers itself
-    let url: String
+    public let url: String
     /// Secret token of host
-    let token: String
+    public let token: String
     /// Token supplied by host on successful registration
-    var registeredToken: String?
+    public var registeredToken: String?
 
     init(url: String, token: String) {
         self.url = url
@@ -21,7 +21,7 @@ open class AppletClient {
     let name: String
     let address: String
     let client = HttpClient()
-    var endpoints = [String: HostAuth]()
+    public var endpoints = [String: HostAuth]()
 
     public init(name: String, address: String) {
         self.name = name
@@ -34,7 +34,8 @@ open class AppletClient {
     /// - `token`    - Parent applet's secret token
     /// - `endpoint` - Child applet's endpoint to which payloads should be sent
     public func registerEndpoint(relUrl: String, hostUrl: String,
-                                 token: String, endpoint: String? = nil)
+                                 token: String, endpoint: String? = nil,
+                                 callback: @escaping (String?) -> Void)
     {
         var e = address + "/"
         if let ep = endpoint {
@@ -46,7 +47,11 @@ open class AppletClient {
         client.registerApplet(name: name, relUrl: relUrl,
                               endpoint: e, hostUrl: hostUrl,
                               token: token, callback: { authToken in
-            self.endpoints[relUrl]!.registeredToken = authToken
+            if let token = authToken {
+                self.endpoints[relUrl]!.registeredToken = token
+            }
+
+            callback(authToken)
         })
     }
 }
