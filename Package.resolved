@@ -83,15 +83,6 @@
         }
       },
       {
-        "package": "Merileva",
-        "repositoryURL": "/source/merileva",
-        "state": {
-          "branch": null,
-          "revision": "c96b8df274a9fd932475e2a04c0bc98b3c19e3ef",
-          "version": "1.0.1"
-        }
-      },
-      {
         "package": "OpenSSL",
         "repositoryURL": "https://github.com/IBM-Swift/OpenSSL.git",
         "state": {
