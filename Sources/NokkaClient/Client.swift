@@ -13,11 +13,10 @@ extension HttpClient {
     {
         let url = hostUrl.joinPath(NokkaRoutes.appletRegistration)
         let req = prepareRequest(method: HTTPMethod.post, url: url, auth: token)
-        let d = RegistrationData(name: name, relUrl: relUrl, endpoint: endpoint)
+        let data = RegistrationData(name: name, relUrl: relUrl, endpoint: endpoint)
 
         Log.info("Registering plugin \(name) (relUrl: \(relUrl), endpoint: \(endpoint))")
-
-        req.setJsonBody(data: d)
+        req.setJsonBody(data: data)
 
         request(with: req, callback: { (response: HttpResponse<Token>) in
             if response.code == 200 {
