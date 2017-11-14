@@ -26,10 +26,8 @@ extension HttpClient {
                 } else {
                     Log.error("Failed to get token for plugin registration")
                 }
-            } else if response.code == 401 {
-                Log.error("Auth failed with server")
-            } else if response.code == 403 {
-                Log.error("Server has forbidden us!")
+            } else {
+                Log.error("Registration failed: (code: \(response.code))")
             }
 
             callback(nil)
