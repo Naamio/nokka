@@ -25,12 +25,12 @@ open class AppletClient {
 
     public init(name: String, address: String) {
         self.name = name
-        self.address = address.trim(chars: "/")
+        self.address = address.trim("/")
     }
 
     /// Register this applet on another applet.
     /// - `relUrl`   - Parent applet's relative URL to which this applet registers
-    /// - `hostUrl`  - Parent applet's registration endpoint
+    /// - `hostUrl`  - Parent applet's host address.
     /// - `token`    - Parent applet's secret token
     /// - `endpoint` - Child applet's endpoint to which payloads should be sent
     public func registerEndpoint(relUrl: String, hostUrl: String,
@@ -38,7 +38,7 @@ open class AppletClient {
     {
         var e = address + "/"
         if let ep = endpoint {
-            e += ep.trim(chars: "/")
+            e += ep.trim("/")
         }
 
         endpoints[relUrl] = HostAuth(url: hostUrl, token: token)

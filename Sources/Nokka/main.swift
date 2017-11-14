@@ -3,6 +3,7 @@ import Foundation
 import HeliumLogger
 import Kitura
 import LoggerAPI
+import NokkaCore
 import NokkaClient
 import NokkaServer
 
@@ -16,12 +17,11 @@ let loki = AppletServer(port: 8002)
 
 // For now, we consider one plugin, and Odin owns all,
 // though this doesn't have to be the case.
-let odinHome = "http://0.0.0.0:8000/applets/register"
+let odinHome = "http://0.0.0.0:8000/"
 let odinSecret = odin.authToken
 
 // Unlike the above, these represent the client-side version of the plugin.
 // (they're not the plugins themselves, but they should be consistent)
-let odinBorson = AppletClient(name: "Odin", address: "http://0.0.0.0:8000")
 let thorOdinson = AppletClient(name: "Thor", address: "http://0.0.0.0:8001")
 let lokiLaufeyson = AppletClient(name: "Loki", address: "http://0.0.0.0:8002")
 

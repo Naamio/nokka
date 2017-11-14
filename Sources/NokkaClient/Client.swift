@@ -11,7 +11,8 @@ extension HttpClient {
                                token: String,
                                callback: @escaping (String) -> Void)
     {
-        let req = prepareRequest(method: HTTPMethod.post, url: hostUrl, auth: token)
+        let url = hostUrl.joinPath(NokkaRoutes.appletRegistration)
+        let req = prepareRequest(method: HTTPMethod.post, url: url, auth: token)
         let d = RegistrationData(name: name, relUrl: relUrl, endpoint: endpoint)
 
         Log.info("Registering plugin \(name) (relUrl: \(relUrl), endpoint: \(endpoint))")

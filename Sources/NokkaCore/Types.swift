@@ -1,3 +1,9 @@
+/// Routes that (when changed) will affect the library.
+public struct NokkaRoutes {
+    public static let glob                     = "/*"
+    public static let appletRegistration       = "/applets/register"
+}
+
 /// Generic HTTP response used by the `HTTPClient`
 public struct HttpResponse<T> {
     public let data: T?

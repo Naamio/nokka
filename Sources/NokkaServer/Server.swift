@@ -25,8 +25,10 @@ open class AppletServer {
     public init(port: Int) {
         self.port = port
         /// Routes that should be initialized before all routes
-        router.post("/applets/register", middleware: BasicAuthMiddleware(token: authToken))
-        router.post("/applets/register", middleware: RegistrationMiddleware(app: self))
+        router.post(NokkaRoutes.appletRegistration,
+                    middleware: BasicAuthMiddleware(token: authToken))
+        router.post(NokkaRoutes.appletRegistration,
+                    middleware: RegistrationMiddleware(app: self))
     }
 
     public func initializeForwarding() {
