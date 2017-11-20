@@ -1,8 +1,10 @@
-@testable import NokkaServer
 @testable import NokkaClient
+@testable import NokkaServer
 
 import Dispatch
 import Kitura
+import NokkaCore
+import SwiftyRequest
 import XCTest
 
 class TestAppletRegistration: XCTestCase {
@@ -18,6 +20,7 @@ class TestAppletRegistration: XCTestCase {
     let lokiLaufeyson = AppletServer(port: 8002)
 
     let odinHome = "http://0.0.0.0:8000"
+    let thorHome = "http://0.0.0.0:8001"
 
     // Unlike AppletServer, AppletClients represent the client-side version of the plugin.
     // (they're not the plugins themselves, but they should be consistent)
@@ -28,7 +31,9 @@ class TestAppletRegistration: XCTestCase {
     static var allTests: [(String, (TestAppletRegistration) -> () throws -> Void)] {
         return [
             ("SuccessfulRegistration", testSuccessfulRegistration),
-            ("DuplicateRegistration", testDuplicateRegistration)
+            ("DuplicateRegistration", testDuplicateRegistration),
+            ("InvalidRegistration", testInvalidRegistration),
+            ("NonAuthenticatedRegistration", testNonAuthenticatedRegistration)
         ]
     }
 
@@ -87,6 +92,47 @@ class TestAppletRegistration: XCTestCase {
                               endpoint: "/battlefield", callback: { token in
             XCTAssertNil(token, "You've let Loki into Earth!!!")
             lokiWants.fulfill()
+        })
+
+        waitForExpectations(timeout: 5) { error in
+            XCTAssertNil(error)
+        }
+    }
+
+    private struct Foo: Codable {
+        let foobar: String
+    }
+
+    func testInvalidRegistration() {
+        let laufeyIntrusion = expectation(description: "Laufey intrudes Bifröst")
+        let url = odinHome.joinPath(NokkaRoutes.appletRegistration)
+        let client = HttpClient()
+        let req = client.prepareRequest(method: HTTPMethod.post,
+                                        url: url,
+                                        auth: odinBorson.authToken)
+        req.responseData(completionHandler: { resp in
+            let response = resp.response!
+            XCTAssertEqual(response.statusCode, 400,
+                           "Laufey should've been kicked!")
+            laufeyIntrusion.fulfill()
+        })
+
+        waitForExpectations(timeout: 5) { error in
+            XCTAssertNil(error)
+        }
+    }
+
+    func testNonAuthenticatedRegistration() {
+        let hammerLift = expectation(description: "Someone tries to lift Mjölnir")
+        let url = thorHome.joinPath(NokkaRoutes.appletRegistration)
+        let client = HttpClient()
+        let req = client.prepareRequest(method: HTTPMethod.post, url: url)
+
+        req.responseData(completionHandler: { resp in
+            let response = resp.response!
+            XCTAssertEqual(response.statusCode, 401,
+                           "NOBODY CAN LIFT Mjölnir!!!")
+            hammerLift.fulfill()
         })
 
         waitForExpectations(timeout: 5) { error in
